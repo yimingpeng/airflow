@@ -1222,6 +1222,14 @@ class TestGetTaskInstances(TestTaskInstanceEndpoint):
                 id="test task_display_name_pattern filter",
             ),
             pytest.param(
+                "task_group_test",
+                True,
+                ("/dags/example_task_group/dagRuns/TEST_DAG_RUN_ID/taskInstances"),
+                {"task_display_name_pattern": "section_1"},
+                3,  # Should match section_1.task_1, section_1.task_2, section_1.task_3
+                id="test task_display_name_pattern with task group expansion",
+            ),
+            pytest.param(
                 [
                     {"task_id": "task_match_id_1"},
                     {"task_id": "task_match_id_2"},
@@ -1382,6 +1390,9 @@ class TestGetTaskInstances(TestTaskInstanceEndpoint):
             dag2_id = "example_skip_dag"
             self.create_task_instances(session, dag_id=dag1_id)
             self.create_task_instances(session, dag_id=dag2_id)
+        elif task_instances == "task_group_test":
+            # test with task group expansion
+            self.create_task_instances(session, dag_id="example_task_group")
         else:
             self.create_task_instances(
                 session,

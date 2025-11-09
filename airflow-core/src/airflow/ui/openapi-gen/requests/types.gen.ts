@@ -2883,7 +2883,7 @@ export type GetTaskInstancesData = {
     startDateLte?: string | null;
     state?: Array<(string)>;
     /**
-     * SQL LIKE expression — use `%` / `_` wildcards (e.g. `%customer_%`). Regular expressions are **not** supported.
+     * SQL LIKE expression to filter by task display name — use `%` / `_` wildcards (e.g. `%customer_%`). Regular expressions are **not** supported. Can also be a task group ID to filter by all tasks within that group.
      */
     taskDisplayNamePattern?: string | null;
     taskId?: string | null;

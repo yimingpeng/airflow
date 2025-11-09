@@ -489,8 +489,10 @@ def get_task_instances(
             )
         query = query.where(TI.run_id == dag_run_id)
     if dag_id != "~":
-        get_dag_for_run_or_latest_version(dag_bag, dag_run, dag_id, session)
+        dag = get_dag_for_run_or_latest_version(dag_bag, dag_run, dag_id, session)
         query = query.where(TI.dag_id == dag_id)
+        if dag:
+            task_display_name_pattern.dag = dag
 
     task_instance_select, total_entries = paginated_select(
         statement=query,

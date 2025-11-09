@@ -6592,11 +6592,15 @@ paths:
           anyOf:
           - type: string
           - type: 'null'
-          description: "SQL LIKE expression \u2014 use `%` / `_` wildcards (e.g. `%customer_%`).\
-            \ Regular expressions are **not** supported."
+          description: "SQL LIKE expression to filter by task display name \u2014\
+            \ use `%` / `_` wildcards (e.g. `%customer_%`). Regular expressions are\
+            \ **not** supported. Can also be a task group ID to filter by all tasks\
+            \ within that group."
           title: Task Display Name Pattern
-        description: "SQL LIKE expression \u2014 use `%` / `_` wildcards (e.g. `%customer_%`).\
-          \ Regular expressions are **not** supported."
+        description: "SQL LIKE expression to filter by task display name \u2014 use\
+          \ `%` / `_` wildcards (e.g. `%customer_%`). Regular expressions are **not**\
+          \ supported. Can also be a task group ID to filter by all tasks within that\
+          \ group."
       - name: dag_id_pattern
         in: query
         required: false

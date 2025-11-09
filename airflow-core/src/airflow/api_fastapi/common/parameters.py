@@ -184,6 +184,44 @@ class _SearchParam(BaseParam[str]):
         raise NotImplementedError("Use search_param_factory instead , depends is not implemented.")
 
 
+class QueryTITaskDisplayNameOrGroupPattern(_SearchParam):
+    """Task display name search with task group expansion."""
+
+    def __init__(self, attribute: ColumnElement, dag=None, skip_none: bool = True):
+        super().__init__(attribute, skip_none)
+        self.dag = dag
+
+    def to_orm(self, select: Select) -> Select:
+        if self.value is None and self.skip_none:
+            return select
+
+        conditions = [self.attribute.ilike(f"%{self.value}%")]
+
+        # Task group expansion: check if value matches a task group ID
+        if self.dag and hasattr(self.dag, "task_group"):
+            task_groups = self.dag.task_group.get_task_group_dict()
+            if target_group := task_groups.get(self.value):
+                task_ids = [task.task_id for task in target_group.iter_tasks()]
+                conditions.append(TaskInstance.task_id.in_(task_ids))
+
+        return select.where(or_(*conditions))
+
+    @classmethod
+    def depends(
+        cls,
+        value: str | None = Query(
+            alias="task_display_name_pattern",
+            default=None,
+            description="SQL LIKE expression to filter by task display name — use `%` / `_` wildcards "
+            "(e.g. `%customer_%`). Regular expressions are **not** supported. "
+            "Can also be a task group ID to filter by all tasks within that group.",
+        ),
+    ) -> QueryTITaskDisplayNameOrGroupPattern:
+        param = cls(TaskInstance.task_display_name, dag=None)
+        value = param.transform_aliases(value)
+        return param.set_value(value)
+
+
 def search_param_factory(
     attribute: ColumnElement,
     pattern_name: str,
@@ -890,7 +928,7 @@ QueryTIExecutorFilter = Annotated[
     ),
 ]
 QueryTITaskDisplayNamePatternSearch = Annotated[
-    _SearchParam, Depends(search_param_factory(TaskInstance.task_display_name, "task_display_name_pattern"))
+    QueryTITaskDisplayNameOrGroupPattern, Depends(QueryTITaskDisplayNameOrGroupPattern.depends)
 ]
 QueryTIDagVersionFilter = Annotated[
     FilterParam[list[int]],
